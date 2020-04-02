@@ -1,4 +1,8 @@
 import { Component } from '@angular/core';
+import { LoadingController } from '@ionic/angular';
+import { WordpressService } from '../wordpress.service';
+
+import { IPost } from '../interfaces/post';
 
 @Component({
   selector: 'app-home',
@@ -7,6 +11,31 @@ import { Component } from '@angular/core';
 })
 export class HomePage {
 
-  constructor() {}
+  posts: IPost[] = [];
 
+  constructor(
+    public loadingController: LoadingController,
+    public woedpress: WordpressService
+  ) { }
+
+  async ionViewDidEnter() {
+
+    const loading = await this.loadingController.create({
+      message: 'now Loading...',
+    });
+
+    if (!this.posts.length) {
+      await loading.present();
+    }
+
+    this.woedpress.getPosts()
+      .subscribe(data => {
+        this.posts = data['posts'];
+        loading.dismiss();
+      });
+  }
+
+  trackByFn(index, item): number {
+    return item.ID;
+  }
 }
